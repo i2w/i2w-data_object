@@ -15,9 +15,8 @@ module I2w
           attr_reader(name)
         end
 
-        def from(attrs)
-          attributes = attrs.symbolize_keys.slice(*attribute_names)
-          new(**attributes)
+        def from(**kwargs)
+          new(**kwargs.slice(*attribute_names))
         end
 
         private
@@ -33,6 +32,10 @@ module I2w
         raise UnknownAttributeError, "Unknown attribute #{unknown_attributes}" if unknown_attributes.any?
 
         kwargs.each { |name, value| instance_variable_set("@#{name}", value) }
+      end
+
+      def to_hash
+        self.class.attribute_names.to_h { |attr| [attr, send(attr)] }
       end
     end
   end

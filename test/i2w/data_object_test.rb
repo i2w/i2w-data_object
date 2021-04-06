@@ -20,9 +20,12 @@ module I2w
 
     test 'immutable data object' do
       point = ImmutablePoint.new(x: 3, y: 4)
+
       assert point.x == 3
       assert point.y == 4
       assert point.frozen?
+      assert_equal({ **point }, { x: 3, y: 4 })
+
       refute point.respond_to?(:x=)
       refute point.respond_to?(:y=)
     end
