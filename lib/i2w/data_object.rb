@@ -7,5 +7,8 @@ require 'i2w/data_object/mutable'
 
 module I2w
   module DataObject
+    class Error < RuntimeError; end
+
+    class UnknownAttributeError < Error; end
   end
 end

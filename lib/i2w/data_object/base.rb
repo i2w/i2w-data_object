@@ -15,6 +15,11 @@ module I2w
           attr_reader(name)
         end
 
+        def from(attrs)
+          attributes = attrs.symbolize_keys.slice(*attribute_names)
+          new(**attributes)
+        end
+
         private
 
         def inherited(subclass)
@@ -23,11 +28,11 @@ module I2w
         end
       end
 
-      def initialize(**args)
-        unknown_attributes = args.keys - self.class.attribute_names
+      def initialize(**kwargs)
+        unknown_attributes = kwargs.keys - self.class.attribute_names
         raise UnknownAttributeError, "Unknown attribute #{unknown_attributes}" if unknown_attributes.any?
 
-        args.each { |name, value| instance_variable_set("@#{name}", value) }
+        kwargs.each { |name, value| instance_variable_set("@#{name}", value) }
       end
     end
   end

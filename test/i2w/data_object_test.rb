@@ -43,5 +43,15 @@ module I2w
       assert point.y == 2
       assert point.z == 3
     end
+
+    test '#new with unknown attributes raises UnknownAttributeError' do
+      assert_raise(DataObject::UnknownAttributeError) { MutablePoint.new(z: 8) }
+    end
+
+    test '#from with unknown attributes ignores them' do
+      point = MutablePoint.from(x: 1, y: 2, z: 3)
+      assert point.x == 1
+      assert point.y == 2
+    end
   end
 end
