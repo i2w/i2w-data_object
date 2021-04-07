@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require_relative 'base'
+
 module I2w
   module DataObject
     # a DataObject that is mutable (has attr_writers)
@@ -13,4 +15,3 @@ module I2w
     end
   end
 end
-

@@ -1,9 +1,8 @@
 # frozen_string_literal: true
 
-require 'i2w/data_object/version'
-require 'i2w/data_object/base'
-require 'i2w/data_object/immutable'
-require 'i2w/data_object/mutable'
+require_relative 'data_object/version'
+require_relative 'data_object/immutable'
+require_relative 'data_object/mutable'
 
 module I2w
   module DataObject

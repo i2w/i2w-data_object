@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require_relative 'base'
+
 module I2w
   module DataObject
     # an immutable, frozen, DataObject
@@ -11,4 +13,3 @@ module I2w
     end
   end
 end
-

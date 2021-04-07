@@ -15,6 +15,7 @@ module I2w
           attr_reader(name)
         end
 
+        # create a data object from kwargs, ignoring any unknown attributes
         def from(**kwargs)
           new(**kwargs.slice(*attribute_names))
         end
@@ -40,4 +41,3 @@ module I2w
     end
   end
 end
-
