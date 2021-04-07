@@ -24,6 +24,7 @@ module I2w
       assert point.x == 3
       assert point.y == 4
       assert point.frozen?
+
       assert_equal({ **point }, { x: 3, y: 4 })
 
       refute point.respond_to?(:x=)
@@ -36,6 +37,8 @@ module I2w
       assert point.y == 4
       refute point.frozen?
 
+      assert_equal({ **point }, { x: 3, y: 4 })
+
       point.x = 5
       assert point.x == 5
     end
@@ -45,6 +48,8 @@ module I2w
       assert point.x == 1
       assert point.y == 2
       assert point.z == 3
+
+      assert_equal({ **point }, { x: 1, y: 2, z: 3 })
     end
 
     test '#new with unknown attributes raises UnknownAttributeError' do
