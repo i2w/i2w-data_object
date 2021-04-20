@@ -61,5 +61,12 @@ module I2w
       assert point.x == 1
       assert point.y == 2
     end
+
+    test '#from with keyword splattable object works as expected' do
+      other = Mutable3dPoint.new(x: 1, y: 2, z: 3)
+      point = MutablePoint.from(other)
+      assert point.x == 1
+      assert point.y == 2
+    end
   end
 end

@@ -15,9 +15,9 @@ module I2w
           attr_reader(name)
         end
 
-        # create a data object from kwargs, ignoring any unknown attributes
-        def from(**kwargs)
-          new(**kwargs.slice(*attribute_names))
+        # create a data object from an object that can double splatted, ignoring any unknown attributes
+        def from(to_hash_duck)
+          new(**to_hash_duck.to_hash.slice(*attribute_names))
         end
 
         private
