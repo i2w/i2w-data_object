@@ -56,13 +56,29 @@ module I2w
       assert_raise(DataObject::UnknownAttributeError) { MutablePoint.new(z: 8) }
     end
 
+    test '#new with missing attributes raises MissingAttributeError' do
+      assert_raise(DataObject::MissingAttributeError) { MutablePoint.new(x: 1) }
+    end
+
     test '#from with unknown attributes ignores them' do
       point = MutablePoint.from(x: 1, y: 2, z: 3)
       assert point.x == 1
       assert point.y == 2
     end
 
-    test '#from with keyword splattable object works as expected' do
+    test '#from with missing attributes sets attributes to nil' do
+      point = MutablePoint.from(x: 1)
+      assert point.x == 1
+      assert point.y.nil?
+    end
+
+    test "#from(...) { |attr| \"Missing \#{attr}\" } fills in the missing attribute" do
+      point = MutablePoint.from(x: 1) { |attr| "Missing #{attr}" }
+      assert point.x == 1
+      assert point.y == 'Missing y'
+    end
+
+    test '#from with double splattable object works as expected' do
       other = Mutable3dPoint.new(x: 1, y: 2, z: 3)
       point = MutablePoint.from(other)
       assert point.x == 1

@@ -9,5 +9,7 @@ module I2w
     class Error < RuntimeError; end
 
     class UnknownAttributeError < Error; end
+
+    class MissingAttributeError < Error; end
   end
 end

@@ -16,8 +16,11 @@ module I2w
         end
 
         # create a data object from an object that can double splatted, ignoring any unknown attributes
-        def from(to_hash_duck)
-          new(**to_hash_duck.to_hash.slice(*attribute_names))
+        def from(object, &missing)
+          attrs = object.to_hash.slice(*attribute_names)
+          (attribute_names - attrs.keys).each { |a| attrs[a] = missing&.call(a) }
+          
+          new(**attrs)
         end
 
         private
@@ -31,6 +34,9 @@ module I2w
       def initialize(**kwargs)
         unknown_attributes = kwargs.keys - self.class.attribute_names
         raise UnknownAttributeError, "Unknown attribute #{unknown_attributes}" if unknown_attributes.any?
+        
+        missing_attributes = self.class.attribute_names - kwargs.keys
+        raise MissingAttributeError, "Missing attribute #{missing_attributes}" if missing_attributes.any?
 
         kwargs.each { |name, value| instance_variable_set("@#{name}", value) }
       end
