@@ -15,11 +15,15 @@ module I2w
           attr_reader(name)
         end
 
-        # create a data object from an object that can double splatted, ignoring any unknown attributes
+        # create a data object from an object that can double splatted
+        #
+        # Unlike .new this method:
+        #   - ignores any unknown attributes
+        #   - fills missing attributes with the result of calling the missing block, or nil
         def from(object, &missing)
           attrs = object.to_hash.slice(*attribute_names)
-          (attribute_names - attrs.keys).each { |a| attrs[a] = missing&.call(a) }
-          
+          (attribute_names - attrs.keys).each { attrs[_1] = missing&.call(_1) }
+
           new(**attrs)
         end
 
@@ -34,7 +38,7 @@ module I2w
       def initialize(**kwargs)
         unknown_attributes = kwargs.keys - self.class.attribute_names
         raise UnknownAttributeError, "Unknown attribute #{unknown_attributes}" if unknown_attributes.any?
-        
+
         missing_attributes = self.class.attribute_names - kwargs.keys
         raise MissingAttributeError, "Missing attribute #{missing_attributes}" if missing_attributes.any?
 
