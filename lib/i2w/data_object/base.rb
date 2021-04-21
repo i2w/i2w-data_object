@@ -15,7 +15,7 @@ module I2w
           attr_reader(name)
         end
 
-        # create a data object from an object that can double splatted
+        # create a data object from an object that can be double splatted
         #
         # Unlike .new this method:
         #   - ignores any unknown attributes

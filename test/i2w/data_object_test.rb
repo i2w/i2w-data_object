@@ -78,6 +78,12 @@ module I2w
       assert point.y == 'Missing y'
     end
 
+    test "#from(...) { 0 } fills in the missing attribute with 1" do
+      point = MutablePoint.from(x: 1) { 0 }
+      assert point.x == 1
+      assert point.y == 0
+    end
+
     test '#from with double splattable object works as expected' do
       other = Mutable3dPoint.new(x: 1, y: 2, z: 3)
       point = MutablePoint.from(other)
