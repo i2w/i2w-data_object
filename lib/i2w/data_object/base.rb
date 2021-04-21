@@ -20,11 +20,15 @@ module I2w
         # Unlike .new this method:
         #   - ignores any unknown attributes
         #   - fills missing attributes with the result of calling the missing block, or nil
-        def from(object, &missing)
-          attrs = object.to_hash.slice(*attribute_names)
-          (attribute_names - attrs.keys).each { attrs[_1] = missing&.call(_1) }
+        def from(...)
+          new(**to_attributes_hash(...))
+        end
 
-          new(**attrs)
+        # returns a hash of attributes with unknown removed, and missing filled
+        def to_attributes_hash(object, &fill_missing)
+          attributes = object.to_h.symbolize_keys.slice(*attribute_names)
+          (attribute_names - attributes.keys).each { attributes[_1] = fill_missing&.call(_1) }
+          attributes
         end
 
         private
@@ -48,6 +52,7 @@ module I2w
       def to_hash
         self.class.attribute_names.to_h { |attr| [attr, send(attr)] }
       end
+      alias to_h to_hash
     end
   end
 end

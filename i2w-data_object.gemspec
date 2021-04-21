@@ -3,6 +3,9 @@ require_relative "lib/i2w/data_object/version"
 Gem::Specification.new do |s|
   s.name        = "i2w-data_object"
   s.version     = I2w::DataObject::VERSION
+
+  s.required_ruby_version = '>= 3.0.0'
+
   s.authors     = ["Ian White"]
   s.email       = ["ian.w.white@gmail.com"]
 

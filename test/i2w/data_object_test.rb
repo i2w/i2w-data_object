@@ -85,10 +85,15 @@ module I2w
     end
 
     test '#from with double splattable object works as expected' do
-      other = Mutable3dPoint.new(x: 1, y: 2, z: 3)
-      point = MutablePoint.from(other)
+      point_3d = Mutable3dPoint.new(x: 1, y: 2, z: 3)
+      point = MutablePoint.from(point_3d)
       assert point.x == 1
       assert point.y == 2
+    end
+
+    test '#to_attributes_hash(object, &fill_missing) returns a safe hash for .new' do
+      actual = MutablePoint.to_attributes_hash([['x', 1], [:z, 4], [:zoopy, [1, 2, 3, 4]]]) { 0 }
+      assert_equal({ x: 1, y: 0 }, actual)
     end
   end
 end
