@@ -78,7 +78,7 @@ module I2w
       assert point.y == 'Missing y'
     end
 
-    test "#from(...) { 0 } fills in the missing attribute with 1" do
+    test "#from(...) { 0 } fills in the missing attribute with 0" do
       point = MutablePoint.from(x: 1) { 0 }
       assert point.x == 1
       assert point.y == 0
