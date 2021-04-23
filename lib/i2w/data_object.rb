@@ -3,7 +3,6 @@
 require_relative 'data_object/version'
 require_relative 'data_object/immutable'
 require_relative 'data_object/mutable'
-require_relative 'lazy'
 
 module I2w
   module DataObject
