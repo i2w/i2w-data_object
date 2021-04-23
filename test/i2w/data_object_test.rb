@@ -95,5 +95,13 @@ module I2w
       actual = MutablePoint.to_attributes_hash([['x', 1], [:z, 4], [:zoopy, [1, 2, 3, 4]]]) { 0 }
       assert_equal({ x: 1, y: 0 }, actual)
     end
+
+    test 'using a lazy object with an immutable data object' do
+      point = ImmutablePoint.new(x: Lazy.new { 3 }, y: 3)
+      assert point.x == 3
+      assert point.y == 3
+      assert point.x == point.y
+      assert point.y == point.x
+    end
   end
 end
