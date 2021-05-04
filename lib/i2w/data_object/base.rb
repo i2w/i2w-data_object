@@ -40,19 +40,21 @@ module I2w
       end
 
       def initialize(**kwargs)
-        unknown_attributes = kwargs.keys - self.class.attribute_names
+        unknown_attributes = kwargs.keys - attribute_names
         raise UnknownAttributeError, "Unknown attribute #{unknown_attributes}" if unknown_attributes.any?
 
-        missing_attributes = self.class.attribute_names - kwargs.keys
+        missing_attributes = attribute_names - kwargs.keys
         raise MissingAttributeError, "Missing attribute #{missing_attributes}" if missing_attributes.any?
 
         kwargs.each { |name, value| instance_variable_set("@#{name}", value) }
       end
 
       def to_hash
-        self.class.attribute_names.to_h { |attr| [attr, send(attr)] }
+        attribute_names.to_h { |attr| [attr, send(attr)] }
       end
       alias to_h to_hash
+
+      def attribute_names = self.class.attribute_names
     end
   end
 end
