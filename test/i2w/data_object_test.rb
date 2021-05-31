@@ -9,9 +9,30 @@ module I2w
       attribute :y
     end
 
+    class ScaledImmutablePoint < ImmutablePoint
+      def initialize(scale:, **kwargs)
+        @scale = scale
+        super(**kwargs)
+      end
+
+      def x = @x * @scale
+
+      def y = @y * @scale
+    end
+
     class MutablePoint < DataObject::Mutable
       attribute :x
       attribute :y
+    end
+
+    class FloatMutablePoint < MutablePoint
+      def x=(val)
+        @x = val.to_f
+      end
+
+      def y=(val)
+        @y = val.to_f
+      end
     end
 
     class Mutable3dPoint < MutablePoint
@@ -25,7 +46,7 @@ module I2w
       assert point.y == 4
       assert point.frozen?
 
-      assert_equal({ **point }, { x: 3, y: 4 })
+      assert_equal({ x: 3, y: 4 }, point.attributes)
 
       refute point.respond_to?(:x=)
       refute point.respond_to?(:y=)
@@ -37,7 +58,7 @@ module I2w
       assert point.y == 4
       refute point.frozen?
 
-      assert_equal({ **point }, { x: 3, y: 4 })
+      assert_equal({ x: 3, y: 4 }, point.attributes)
 
       point.x = 5
       assert point.x == 5
@@ -49,7 +70,25 @@ module I2w
       assert point.y == 2
       assert point.z == 3
 
-      assert_equal({ **point }, { x: 1, y: 2, z: 3 })
+      assert_equal({ x: 1, y: 2, z: 3 }, point.attributes)
+    end
+
+    test 'data object with custom getters' do
+      point = ScaledImmutablePoint.new(x: 2, y: 3, scale: 100)
+
+      assert point.x == 200
+      assert point.y == 300
+
+      assert_equal({ x: 200, y: 300 }, point.attributes)
+    end
+
+    test 'data object with custom setters' do
+      point = FloatMutablePoint.new(x: 1, y: BigDecimal('2'))
+
+      assert_equal Float, point.x.class
+      assert_equal Float, point.y.class
+
+      assert_equal({ x: 1.0, y: 2.0 }, point.attributes)
     end
 
     test '#new with unknown attributes raises UnknownAttributeError' do
@@ -78,14 +117,14 @@ module I2w
       assert point.y == 'Missing y'
     end
 
-    test "#from(...) { 0 } fills in the missing attribute with 0" do
+    test '#from(...) { 0 } fills in the missing attribute with 0' do
       point = MutablePoint.from(x: 1) { 0 }
       assert point.x == 1
       assert point.y == 0
     end
 
     test '#from with double splattable object works as expected' do
-      point_3d = Mutable3dPoint.new(x: 1, y: 2, z: 3)
+      point_3d = [[:x, 1], [:y, 2], [:z, 3]]
       point = MutablePoint.from(point_3d)
       assert point.x == 1
       assert point.y == 2

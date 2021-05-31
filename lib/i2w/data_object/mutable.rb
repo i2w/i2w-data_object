@@ -12,6 +12,12 @@ module I2w
           attr_writer(name)
         end
       end
+
+      private
+
+      def _set_attributes(attrs)
+        attrs.each { |name, value| send("#{name}=", value) }
+      end
     end
   end
 end

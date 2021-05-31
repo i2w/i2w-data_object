@@ -46,15 +46,18 @@ module I2w
         missing_attributes = attribute_names - kwargs.keys
         raise MissingAttributeError, "Missing attribute #{missing_attributes}" if missing_attributes.any?
 
-        kwargs.each { |name, value| instance_variable_set("@#{name}", value) }
+        _set_attributes(kwargs)
       end
 
-      def to_hash
-        attribute_names.to_h { |attr| [attr, send(attr)] }
-      end
-      alias to_h to_hash
+      def attributes = attribute_names.to_h { |attr| [attr, send(attr)] }
 
       def attribute_names = self.class.attribute_names
+
+      private
+
+      def _set_attributes(attrs)
+        attrs.each { |name, value| instance_variable_set("@#{name}", value) }
+      end
     end
   end
 end
