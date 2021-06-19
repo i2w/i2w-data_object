@@ -66,13 +66,13 @@ module I2w
       assert_equal 'Foo: 2', obj2.foo(2)
       assert_equal 'Foo: 1', obj1.foo(1)
 
-      assert_equal 2, Test.send(:memoized_cache).instance_eval { @cache }.length
+      assert_equal 2, Test.send(:memoize_cache).instance_eval { @cache }.length
 
       obj1 = nil
       GC.start
 
       assert_equal 'Foo: 2', obj2.foo(2)
-      assert_equal 1, Test.send(:memoized_cache).instance_eval { @cache }.length
+      assert_equal 1, Test.send(:memoize_cache).instance_eval { @cache }.length
     end
 
     test 'memoization of immutable objects' do
@@ -82,7 +82,7 @@ module I2w
       assert_equal 'Foo: 1', obj.foo(1)
       assert_equal 'Foo: 1', obj.foo(1)
 
-      assert_equal [{ [:foo, 1] => 'Foo: 1' }], ImmutableTest.send(:memoized_cache).instance_eval { @cache }.values
+      assert_equal [{ [:foo, 1] => 'Foo: 1' }], ImmutableTest.send(:memoize_cache).instance_eval { @cache }.values
     end
   end
 end
