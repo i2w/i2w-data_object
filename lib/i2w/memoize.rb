@@ -10,15 +10,36 @@ module I2w
   #
   # inspired by https://github.com/iliabylich/memoized_on_frozen/blob/master/lib/memoized_on_frozen.rb
   module Memoize
-    def self.included(klass)
-      klass.prepend SetWeakRef
-      klass.extend ClassMethods
+    def self.extended(into)
+      into.instance_variable_set(:@_memoize_cache, WeakRefCache.new)
+      PrependSetWeakRefToClass.call(into)
     end
 
-    private
+    def memoize(*method_names)
+      weakref_cache = @_memoize_cache
+      method_names.each do |method_name|
+        original = instance_method(method_name)
+        remove_method(method_name)
+        define_method(method_name) do |*args|
+          key = [method_name, *args]
+          obj_cache = weakref_cache[_weakref]
+          obj_cache.fetch(key) { obj_cache[key] = original.bind(self).call(*args) }
+        end
+      end
+    end
 
-    # return or cache the value for the given keys
-    def memoized(*key, &value) = self.class.memoized(@_weakref, key, &value)
+    # we need to prepend SetWeakRef into the class that this is either extended with Memoize, or into any class
+    # eventually including a module that is extended by Memoize
+    module PrependSetWeakRefToClass
+      def self.call(into)
+        into.is_a?(Class) ? into.prepend(SetWeakRef) : into.singleton_class.prepend(self)
+      end
+
+      def included(into)
+        PrependSetWeakRefToClass.call(into)
+        super
+      end
+    end
 
     # set weak ref on initialization
     module SetWeakRef
@@ -26,37 +47,19 @@ module I2w
         @_weakref = WeakRef.new(self)
         super
       end
-    end
-
-    # class interface
-    module ClassMethods
-      def memoized(weakref, key, &value)
-        cache_for_weakref = memoize_cache[weakref]
-        cache_for_weakref.fetch(key) { cache_for_weakref[key] = value.call }
-      end
 
       private
 
-      def memoize_cache = @memoize_cache ||= WeakRefCache.new { |m, key| m[key] = {} }
-
-      # memoize the passed instance methods (does not handle methods that take blocks)
-      def memoize(*method_names)
-        method_names.each do |method_name|
-          original = instance_method(method_name)
-          remove_method(method_name)
-          define_method(method_name) do |*args|
-            memoized(method_name, *args) { original.bind(self).call(*args) }
-          end
-        end
-      end
+      attr_reader :_weakref
     end
 
-    # cache with weakref as keys, which are cleared on access if they are not alive
+    # cache with weakref as keys, which are cleared on access if they are not alive.  Clearing only happens if the
+    # GC has run since last access.
     class WeakRefCache
       # accepts same arguments as Hash.new, which is used to construct the cache
-      def initialize(...)
+      def initialize
         @cleared_at = GC.count
-        @cache = Hash.new(...)
+        @cache = Hash.new { |cache, weakref| cache[weakref] = {} }
       end
 
       def [](weakref)
