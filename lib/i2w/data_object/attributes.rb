@@ -36,10 +36,7 @@ module I2w
 
       include InstanceMethods
 
-      def self.included(into)
-        into.extend DefineAttributes
-        into.extend ClassMethods
-      end
+      def self.included(into) = into.extend(ClassMethods, DefineAttributes)
 
       def initialize(**attrs)
         assert_correct_attribute_names!(attrs.keys)
@@ -51,11 +48,7 @@ module I2w
       module Mutable
         include InstanceMethods
 
-        def self.included(into)
-          into.extend DefineAttributes
-          into.extend ClassMethods
-          into.extend AttributeWriters
-        end
+        def self.included(into) = into.extend(ClassMethods, AttributeWriters, DefineAttributes)
 
         def initialize(**attrs)
           assert_correct_attribute_names!(attrs.keys)
