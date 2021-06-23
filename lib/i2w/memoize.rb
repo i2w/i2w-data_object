@@ -6,8 +6,7 @@ module I2w
   # TODO: evaluate whether this is a bad idea (do some production testing), if it's OK, move into own gem
   #
   # enabes memoization, keeping references on the extended module or class, but with WeakRef keys,
-  # which can be garbage collected.
-  # This makes it possible to memoize methods on frozen objects.
+  # which can be garbage collected. This makes it possible to memoize methods on frozen objects.
   #
   # inspired by https://github.com/iliabylich/memoized_on_frozen/blob/master/lib/memoized_on_frozen.rb
   module Memoize
@@ -29,13 +28,11 @@ module I2w
     end
 
     module PrependSetWeakRefToClass #:nodoc:
-      # either prepend SetWeakRef to arg if a class, or prepend this module to arg's singleton class if a module
-      # this ensures that SetWeakRef will eventually be prepended to any class that includes the memoized module
-      def self.call(arg) = arg.is_a?(Class) ? arg.prepend(SetWeakRef) : arg.singleton_class.prepend(self)
+      # prepend SetWeakRef to class, or if a module, set a hook to ensure that eventually happens
+      def self.call(into) = into.is_a?(Class) ? into.prepend(SetWeakRef) : into.singleton_class.prepend(Included)
 
-      def included(into)
-        PrependSetWeakRefToClass.call(into)
-        super
+      module Included #:nodoc:
+        def included(into) = super.tap { PrependSetWeakRefToClass.call(into) }
       end
     end
 
@@ -46,9 +43,8 @@ module I2w
       end
     end
 
-    # cache with weakref as keys, which are cleared on access if they are not alive.  Clearing only happens if the
-    # GC has run since last access.
-    class WeakRefCache
+    # cache with weakref as keys, which are cleared on access if they are not alive.
+    class WeakRefCache #:nodoc:
       def initialize
         @cleared_at = GC.count
         @cache = Hash.new { |cache, weakref| cache[weakref] = {} }
