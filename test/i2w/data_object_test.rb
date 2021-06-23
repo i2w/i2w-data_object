@@ -39,6 +39,31 @@ module I2w
       attribute :z
     end
 
+    module PointXY
+      extend DataObject::DefineAttributes
+
+      attribute :x
+      attribute :y
+    end
+
+    module PointZ
+      include DataObject::Attributes
+
+      attribute :z
+    end
+
+    class ModularMutable3dPoint
+      include PointXY
+      include PointZ
+      include DataObject::Attributes::Mutable
+    end
+
+    class ModularImmutable3dPoint
+      include DataObject::Attributes
+      include PointXY
+      include PointZ
+    end
+
     test 'immutable data object' do
       point = ImmutablePoint.new(x: 3, y: 4)
 
@@ -70,6 +95,23 @@ module I2w
       assert point.y == 2
       assert point.z == 3
 
+      assert_equal({ x: 1, y: 2, z: 3 }, point.attributes)
+    end
+
+    test 'data object composed of mixins' do
+      point = ModularMutable3dPoint.new(x: 1, y: 2, z: 3)
+      assert point.x == 1
+      assert point.y == 2
+      assert point.z == 3
+
+      point.z = 4
+
+      assert_equal({ x: 1, y: 2, z: 4 }, point.attributes)
+
+      point = ModularImmutable3dPoint.new(x: 1, y: 2, z: 3)
+
+      refute point.respond_to?(:z=)
+      assert point.frozen?
       assert_equal({ x: 1, y: 2, z: 3 }, point.attributes)
     end
 
