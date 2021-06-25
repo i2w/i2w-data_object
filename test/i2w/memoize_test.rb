@@ -89,7 +89,21 @@ module I2w
       GC.start
 
       assert_equal 'Foo: 2', obj2.foo(2)
-      assert_equal 1,  Test.instance_variable_get(:@_memoize_cache).instance_eval { @cache }.length
+      assert_equal 1, Test.instance_variable_get(:@_memoize_cache).instance_eval { @cache }.length
+    end
+
+    test 'clear_memoization_for(obj)' do
+      GC.start
+
+      obj1 = Test.new
+      assert_equal 'Foo: 1', obj1.foo(1)
+
+      assert_equal [{ [:foo, 1] => 'Foo: 1' }],
+                   Test.instance_variable_get(:@_memoize_cache).instance_eval { @cache }.values
+
+      Test.clear_memoization_for(obj1)
+
+      assert_equal [{}], Test.instance_variable_get(:@_memoize_cache).instance_eval { @cache }.values
     end
 
     test 'memoization of immutable objects' do
@@ -99,7 +113,9 @@ module I2w
       assert_equal 'Foo: 1', obj.foo(1)
       assert_equal 'Foo: 1', obj.foo(1)
 
-      assert_equal [{ [:foo, 1] => 'Foo: 1' }], ImmutableTest.instance_variable_get(:@_memoize_cache).instance_eval { @cache }.values
+      assert_equal [{ [:foo, 1] => 'Foo: 1' }], ImmutableTest.instance_variable_get(:@_memoize_cache).instance_eval {
+                                                  @cache
+                                                }.values
     end
 
     test 'memoization of module based methods' do
@@ -109,7 +125,9 @@ module I2w
       assert_equal 'Foo: 1', obj.foo(1)
       assert_equal 'Foo: 1', obj.foo(1)
 
-      assert_equal [{ [:foo, 1] => 'Foo: 1' }], ModuleTest::Foo.instance_variable_get(:@_memoize_cache).instance_eval { @cache }.values
+      assert_equal [{ [:foo, 1] => 'Foo: 1' }], ModuleTest::Foo.instance_variable_get(:@_memoize_cache).instance_eval {
+                                                  @cache
+                                                }.values
     end
   end
 end

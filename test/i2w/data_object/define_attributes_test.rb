@@ -27,11 +27,13 @@ module I2w
       class Test
         include FooAndBar
         extend DefineAttributes
-
+        extend Attributes::ClassMethods # provides .attribute_names
+        
         attribute :baz
       end
 
       test 'class that includes module with attributes' do
+        
         assert_equal %i[foo bar baz], Test.attribute_names
       end
     end

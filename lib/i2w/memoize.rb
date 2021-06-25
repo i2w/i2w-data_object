@@ -27,6 +27,8 @@ module I2w
       end
     end
 
+    def clear_memoization_for(obj) = @_memoize_cache[obj.instance_variable_get(:@_weakref)]&.clear
+
     module PrependSetWeakRefToClass #:nodoc:
       # prepend SetWeakRef to class, or if a module, set a hook to ensure that eventually happens
       def self.call(into) = into.is_a?(Class) ? into.prepend(SetWeakRef) : into.singleton_class.prepend(Included)

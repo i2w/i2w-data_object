@@ -15,9 +15,9 @@ module I2w
         super(**kwargs)
       end
 
-      def x = @x * @scale
+      def x = super * @scale
 
-      def y = @y * @scale
+      def y = super * @scale
     end
 
     class MutablePoint < DataObject::Mutable

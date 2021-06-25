@@ -7,6 +7,10 @@ module I2w
     # include this to define immutable attributes for your class or module
     module Attributes
       module ClassMethods #:nodoc:
+        def self.extended(into) = setup_attribute_attrs_module(into)
+
+        def self.setup_attribute_attrs_module(klass) = klass.include(klass.const_set(:AttributeAttrs, Module.new))
+
         # create a data object from an object that can be double splatted, see #to_attributes_hash
         def from(...) = new(**to_attributes_hash(...))
 
@@ -15,6 +19,26 @@ module I2w
           attributes = object.to_h.symbolize_keys.slice(*attribute_names)
           (attribute_names - attributes.keys).each { attributes[_1] = fill_missing&.call(_1) }
           attributes
+        end
+
+        def attribute_names = @attribute_names ||= finalize_attribute_names
+
+        private
+
+        def finalize_attribute_names = ancestor_attribute_names.each { define_attribute_attr_method(_1) }
+
+        def define_attribute_attr_method(name)
+          self::AttributeAttrs.attr_reader(name) unless method_defined?(name)
+        end
+
+        def ancestor_attribute_names
+          [self, *ancestors].map { _1.instance_variable_get :@_attribute_names }.compact.reverse.flatten.uniq
+        end
+
+        def inherited(subclass)
+          finalize_attribute_names
+          ClassMethods.setup_attribute_attrs_module(subclass)
+          super
         end
       end
 
@@ -48,7 +72,7 @@ module I2w
       module Mutable
         include InstanceMethods
 
-        def self.included(into) = into.extend(ClassMethods, AttributeWriters, DefineAttributes)
+        def self.included(into) = into.extend(AttributeWriters, ClassMethods, DefineAttributes)
 
         def initialize(**attrs)
           assert_correct_attribute_names!(attrs.keys)
@@ -56,9 +80,12 @@ module I2w
         end
 
         module AttributeWriters #:nodoc:
-          def self.extended(into) = DefineAttributes::UpdateAttributeNames.call(into)
-
-          def attribute(name) = super.tap { attr_writer(name) unless method_defined?("#{name}=") }
+          private
+          
+          def define_attribute_attr_method(name)
+            self::AttributeAttrs.attr_writer(name) unless method_defined?("#{name}=")
+            super
+          end
         end
       end
     end
