@@ -7,10 +7,6 @@ module I2w
     # include this to define immutable attributes for your class or module
     module Attributes
       module ClassMethods #:nodoc:
-        def self.extended(into) = setup_attribute_attrs_module(into)
-
-        def self.setup_attribute_attrs_module(klass) = klass.include(klass.const_set(:AttributeAttrs, Module.new))
-
         # create a data object from an object that can be double splatted, see #to_attributes_hash
         def from(...) = new(**to_attributes_hash(...))
 
@@ -28,6 +24,8 @@ module I2w
         def finalize_attribute_names = ancestor_attribute_names.each { define_attribute_attr_method(_1) }
 
         def define_attribute_attr_method(name)
+          module_eval 'module AttributeAttrs; end'
+          include(self::AttributeAttrs)
           self::AttributeAttrs.attr_reader(name) unless method_defined?(name)
         end
 
@@ -37,7 +35,6 @@ module I2w
 
         def inherited(subclass)
           finalize_attribute_names
-          ClassMethods.setup_attribute_attrs_module(subclass)
           super
         end
       end
@@ -81,10 +78,10 @@ module I2w
 
         module AttributeWriters #:nodoc:
           private
-          
+
           def define_attribute_attr_method(name)
-            self::AttributeAttrs.attr_writer(name) unless method_defined?("#{name}=")
             super
+            self::AttributeAttrs.attr_writer(name) unless method_defined?("#{name}=")
           end
         end
       end

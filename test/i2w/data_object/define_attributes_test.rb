@@ -25,10 +25,10 @@ module I2w
       end
 
       class Test
+        include Foo
+        include Attributes # provides .attribute_names
         include FooAndBar
-        extend DefineAttributes
-        extend Attributes::ClassMethods # provides .attribute_names
-        
+
         attribute :baz
       end
 
