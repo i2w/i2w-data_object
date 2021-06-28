@@ -30,8 +30,8 @@ module I2w
         end
 
         def attribute_methods
-          module_eval 'module AttributesMethods; end', __FILE__, __LINE__
-          include(self::AttributesMethods)
+          module_eval 'module AttributeMethods; end', __FILE__, __LINE__
+          include(self::AttributeMethods)
           self::AttributeMethods
         end
 
