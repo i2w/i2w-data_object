@@ -6,9 +6,9 @@ module I2w
     module DefineAttributes
       private
 
-      def _attribute_names = @_attribute_names ||= []
+      def _attributes = @_attributes ||= {}
 
-      def attribute(name) = _attribute_names << name
+      def attribute(name) = _attributes[name.to_sym] = {}
     end
   end
 end

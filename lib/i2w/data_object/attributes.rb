@@ -17,24 +17,31 @@ module I2w
           attributes
         end
 
-        def attribute_names = @attribute_names ||= finalize_attribute_names
+        def attributes = @attributes ||= finalize_attributes
+
+        def attribute_names = attributes.keys
 
         private
 
-        def finalize_attribute_names = ancestor_attribute_names.each { define_attribute_attr_method(_1) }
+        def finalize_attributes = ancestor_attributes.each { define_attribute_method(_1, _2) }
 
-        def define_attribute_attr_method(name)
-          module_eval 'module AttributeAttrs; end'
-          include(self::AttributeAttrs)
-          self::AttributeAttrs.attr_reader(name) unless method_defined?(name)
+        def define_attribute_method(name, _meta)
+          attribute_methods.attr_reader(name) unless method_defined?(name)
         end
 
-        def ancestor_attribute_names
-          [self, *ancestors].map { _1.instance_variable_get :@_attribute_names }.compact.reverse.flatten.uniq
+        def attribute_methods
+          module_eval 'module AttributesMethods; end', __FILE__, __LINE__
+          include(self::AttributesMethods)
+          self::AttributeMethods
+        end
+
+        def ancestor_attributes
+          [self, *ancestors].map { _1.instance_variable_get :@_attributes }.reverse
+                            .each_with_object({}) { |attrs, result| result.merge!(attrs) if attrs }
         end
 
         def inherited(subclass)
-          finalize_attribute_names
+          finalize_attributes
           super
         end
       end
@@ -79,9 +86,9 @@ module I2w
         module AttributeWriters #:nodoc:
           private
 
-          def define_attribute_attr_method(name)
+          def define_attribute_method(name, _meta)
             super
-            self::AttributeAttrs.attr_writer(name) unless method_defined?("#{name}=")
+            attribute_methods.attr_writer(name) unless method_defined?("#{name}=")
           end
         end
       end
