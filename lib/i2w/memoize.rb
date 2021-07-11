@@ -3,7 +3,7 @@
 module I2w
   # Memoization which handles frozen objects, and including modules with memoized methods
   module Memoize
-    def self.extended(into) = PrependCache.call(into)
+    def self.extended(into) = Attach.call(into)
 
     def memoize(*method_names)
       method_names.each do |method_name|
@@ -13,21 +13,26 @@ module I2w
 
         define_method(method_name) do |*args, **opts|
           key = [method_name, args, opts]
-          @_memoize_cache.fetch(key) { @_memoize_cache[key] = orig_method.bind_call(self, *args, **opts) }
+          _memoize_cache.fetch(key) { _memoize_cache[key] = orig_method.bind_call(self, *args, **opts) }
         end
       end
     end
 
-    module PrependCache #:nodoc:
-      # prepend Cache to class, or if a module, set a hook to ensure that eventually happens
-      def self.call(into) = into.is_a?(Class) ? into.prepend(Cache) : into.singleton_class.prepend(Included)
+    module Attach #:nodoc:
+      # setup class or singleton class for memoize, or prepend module hooks to ensure that happens
+      def self.call(into)
+        return into.include(ForSingleton) if into.singleton_class?
+        return into.prepend(ForClass)     if into.instance_of?(Class)
 
-      module Included #:nodoc:
-        def included(into) = super.tap { PrependCache.call(into) }
+        into.singleton_class.prepend(Attach)
       end
+
+      def included(into) = super.tap { Attach.call(into) }
+
+      def extended(into) = super.tap { into.include(ForSingleton) }
     end
 
-    module Cache #:nodoc:
+    module ForClass #:nodoc:
       def initialize(...)
         @_memoize_cache = {}
         super
@@ -35,7 +40,17 @@ module I2w
 
       private
 
+      attr_reader :_memoize_cache
+
       def _clear_memoization = @_memoize_cache.clear
+    end
+
+    module ForSingleton #:nodoc:
+      private
+
+      def _memoize_cache = @_memoize_cache ||= {}
+
+      def _clear_memoization = @_memoize_cache&.clear
     end
   end
 end

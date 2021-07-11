@@ -17,7 +17,7 @@ module I2w
 
       def x = super * @scale
 
-      def y = super * @scale
+      memoize def y = super * @scale
     end
 
     class MutablePoint < DataObject::Mutable

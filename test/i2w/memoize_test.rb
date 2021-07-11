@@ -57,38 +57,88 @@ module I2w
       end
     end
 
-    [Test, SubclassTest, ImmutableTest, ModuleTest].each do |klass|
-      test "#{klass}: memoization works as expected" do
-        side_effects = []
+    class SingletonClassTest
+      class << self
+        extend Memoize
 
-        obj = klass.new(side_effects)
+        attr_writer :side_effects
 
-        assert_equal 'Foo: 1', obj.foo(1)
-        assert_equal 'Foo: 1', obj.foo(1)
-        assert_equal 'Foo: 2', obj.foo(2)
-        assert_equal 'Foo: 1', obj.foo(1)
-        assert_equal 'Foo: 3', obj.foo(3)
-        assert_equal 'Foo: 3', obj.foo(3)
+        memoize def foo(*args, **opts)
+          @side_effects << [self, :foo, args, opts]
+          "Foo: #{args.join(', ')}"
+        end
+      end
+    end
 
-        assert_equal [ [obj, :foo, [1], {}],
-                       [obj, :foo, [2], {}],
-                       [obj, :foo, [3], {}] ], side_effects
+    module SingletonModuleTest
+      class << self
+        extend Memoize
 
-        obj.send(:_clear_memoization)
+        attr_writer :side_effects
 
-        assert_equal 'Foo: 1', obj.foo(1)
-        assert_equal [ [obj, :foo, [1], {}],
-                       [obj, :foo, [2], {}],
-                       [obj, :foo, [3], {}],
-                       [obj, :foo, [1], {}] ], side_effects
+        memoize def foo(*args, **opts)
+          @side_effects << [self, :foo, args, opts]
+          "Foo: #{args.join(', ')}"
+        end
+      end
+    end
 
-        assert_equal 'Foo: 1', obj.foo(1, busted: true)
 
-        assert_equal [ [obj, :foo, [1], {}],
-                       [obj, :foo, [2], {}],
-                       [obj, :foo, [3], {}],
-                       [obj, :foo, [1], {}],
-                       [obj, :foo, [1], { busted: true }] ], side_effects
+    module ExtendSelfTest
+      extend Memoize
+      extend self
+
+      attr_writer :side_effects
+
+      memoize def foo(*args, **opts)
+        @side_effects << [self, :foo, args, opts]
+        "Foo: #{args.join(', ')}"
+      end
+    end
+
+    {
+      class: [Test, SubclassTest, ImmutableTest, ModuleTest],
+      singleton: [SingletonClassTest, SingletonModuleTest, ExtendSelfTest]
+    }.each do |type, classes|
+      classes.each do |klass|
+        test "#{type}: #{klass}: memoization works as expected" do
+          side_effects = []
+
+          obj = case type
+                when :class
+                  klass.new(side_effects)
+                when :singleton
+                  klass.side_effects = side_effects
+                  klass
+                end
+
+          assert_equal 'Foo: 1', obj.foo(1)
+          assert_equal 'Foo: 1', obj.foo(1)
+          assert_equal 'Foo: 2', obj.foo(2)
+          assert_equal 'Foo: 1', obj.foo(1)
+          assert_equal 'Foo: 3', obj.foo(3)
+          assert_equal 'Foo: 3', obj.foo(3)
+
+          assert_equal [[obj, :foo, [1], {}],
+                        [obj, :foo, [2], {}],
+                        [obj, :foo, [3], {}]], side_effects
+
+          obj.send(:_clear_memoization)
+
+          assert_equal 'Foo: 1', obj.foo(1)
+          assert_equal [[obj, :foo, [1], {}],
+                        [obj, :foo, [2], {}],
+                        [obj, :foo, [3], {}],
+                        [obj, :foo, [1], {}]], side_effects
+
+          assert_equal 'Foo: 1', obj.foo(1, busted: true)
+
+          assert_equal [[obj, :foo, [1], {}],
+                        [obj, :foo, [2], {}],
+                        [obj, :foo, [3], {}],
+                        [obj, :foo, [1], {}],
+                        [obj, :foo, [1], { busted: true }]], side_effects
+        end
       end
     end
   end
