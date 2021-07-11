@@ -15,7 +15,7 @@ module I2w
 
         define_method(method_name) do |*args, **opts|
           key = [method_name, args, opts]
-          @_memoize_cache.fetch(key) { @_memoize_cache[key] = orig_method.bind(self).call(*args, **opts) }
+          @_memoize_cache.fetch(key) { @_memoize_cache[key] = orig_method.bind_call(self, *args, **opts) }
         end
       end
     end
