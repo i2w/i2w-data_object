@@ -1,11 +1,9 @@
 # frozen_string_literal: true
 
 module I2w
-  # Simple memoization with handles frozen objects, and including modules with memoized methods
+  # Memoization which handles frozen objects, and including modules with memoized methods
   module Memoize
-    def self.extended(into)
-      PrependCache.call(into)
-    end
+    def self.extended(into) = PrependCache.call(into)
 
     def memoize(*method_names)
       method_names.each do |method_name|
