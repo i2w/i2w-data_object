@@ -123,8 +123,8 @@ module I2w
                         [obj, :foo, [2], {}],
                         [obj, :foo, [3], {}]], side_effects
 
-          obj.send(:_clear_memoization)
-
+          obj.send(:_memoize_cache).clear
+          
           assert_equal 'Foo: 1', obj.foo(1)
           assert_equal [[obj, :foo, [1], {}],
                         [obj, :foo, [2], {}],

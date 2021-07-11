@@ -3,7 +3,7 @@
 module I2w
   # Memoization which handles frozen objects, and including modules with memoized methods
   module Memoize
-    def self.extended(into) = Attach.call(into)
+    def self.extended(object) = Attach.call(object)
 
     def memoize(*method_names)
       method_names.each do |method_name|
@@ -20,16 +20,17 @@ module I2w
 
     module Attach #:nodoc:
       # setup class or singleton class for memoize, or prepend module hooks to ensure that happens
-      def self.call(into)
-        return into.include(ForSingleton) if into.singleton_class?
-        return into.prepend(ForClass)     if into.instance_of?(Class)
+      def self.call(object)
+        return object.include(ForSingleton) if object.singleton_class?
+        return object.prepend(ForClass)     if object.instance_of?(Class)
 
-        into.singleton_class.prepend(Attach)
+        # object is a module: prepend this, so that it extends or includes memoization setup
+        object.singleton_class.prepend(Attach)
       end
 
-      def included(into) = super.tap { Attach.call(into) }
+      def included(object) = super.tap { Attach.call(object) }
 
-      def extended(into) = super.tap { into.include(ForSingleton) }
+      def extended(object) = super.tap { object.include(ForSingleton) }
     end
 
     module ForClass #:nodoc:
@@ -41,16 +42,12 @@ module I2w
       private
 
       attr_reader :_memoize_cache
-
-      def _clear_memoization = @_memoize_cache.clear
     end
 
     module ForSingleton #:nodoc:
       private
 
       def _memoize_cache = @_memoize_cache ||= {}
-
-      def _clear_memoization = @_memoize_cache&.clear
     end
   end
 end

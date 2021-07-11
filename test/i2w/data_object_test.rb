@@ -17,6 +17,7 @@ module I2w
 
       def x = super * @scale
 
+      # immutable objects can have memoized methods
       memoize def y = super * @scale
     end
 
