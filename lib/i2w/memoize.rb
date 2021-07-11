@@ -4,7 +4,7 @@ module I2w
   # Simple memoization with handles frozen objects, and including modules with memoized methods
   module Memoize
     def self.extended(into)
-      PrependMemoizeCache.call(into)
+      PrependCache.call(into)
     end
 
     def memoize(*method_names)
@@ -20,16 +20,16 @@ module I2w
       end
     end
 
-    module PrependMemoizeCache #:nodoc:
-      # prepend MemoizeCache to class, or if a module, set a hook to ensure that eventually happens
-      def self.call(into) = into.is_a?(Class) ? into.prepend(MemoizeCache) : into.singleton_class.prepend(Included)
+    module PrependCache #:nodoc:
+      # prepend Cache to class, or if a module, set a hook to ensure that eventually happens
+      def self.call(into) = into.is_a?(Class) ? into.prepend(Cache) : into.singleton_class.prepend(Included)
 
       module Included #:nodoc:
-        def included(into) = super.tap { PrependMemoizeCache.call(into) }
+        def included(into) = super.tap { PrependCache.call(into) }
       end
     end
 
-    module MemoizeCache #:nodoc:
+    module Cache #:nodoc:
       def initialize(...)
         @_memoize_cache = {}
         super
