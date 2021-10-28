@@ -26,7 +26,11 @@ module I2w
         def finalize_attributes = ancestor_attributes.each { define_attribute_method(_1, _2) }
 
         def define_attribute_method(name, _meta)
-          attribute_methods.attr_reader(name) unless method_defined?(name)
+          attribute_methods.attr_reader(name) unless attribute_methods.public_method_defined?(name, false)
+          unless attribute_methods.method_defined?("#{name}=", false) || attribute_methods.private_method_defined?("#{name}=", false)
+            attribute_methods.attr_writer(name)
+            attribute_methods.send(:private, :"#{name}=")
+          end
         end
 
         def attribute_methods
@@ -68,7 +72,7 @@ module I2w
 
       def initialize(**attrs)
         assert_correct_attribute_names!(attrs.keys)
-        attrs.each { instance_variable_set "@#{_1}", _2 }
+        attrs.each { send "#{_1}=", _2 }
         freeze
       end
 
@@ -80,7 +84,7 @@ module I2w
 
         def initialize(**attrs)
           assert_correct_attribute_names!(attrs.keys)
-          attrs.each { send "#{_1}=", _2 }
+          attrs.each { public_send "#{_1}=", _2 }
         end
 
         module AttributeWriters #:nodoc:
@@ -88,7 +92,7 @@ module I2w
 
           def define_attribute_method(name, _meta)
             super
-            attribute_methods.attr_writer(name) unless method_defined?("#{name}=")
+            attribute_methods.send(:public, :"#{name}=") if attribute_methods.private_method_defined?("#{name}=", false)
           end
         end
       end
