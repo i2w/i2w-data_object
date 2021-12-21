@@ -9,12 +9,12 @@ module I2w
       method_names.each do |method_name|
         alias_method "_unmemoized_#{method_name}", method_name
         remove_method method_name
-        module_eval <<~end_ruby
-          def #{method_name}(*args, **kwargs)
-            _memoize_cache.fetch [:#{method_name}, args, kwargs] do
-              _memoize_cache[_1] = _unmemoized_#{method_name}(*args, **kwargs)
-            end
-          end
+        module_eval <<~end_ruby, __FILE__, __LINE__
+          def #{method_name}(*a, **kw)                                  # def foo(*a, **kw)
+            _memoize_cache.fetch [:#{method_name}, a, kw] do            #   _memoize_cache.fetch [:foo, a, kw] do
+              _memoize_cache[_1] = _unmemoized_#{method_name}(*a, **kw) #     _memoize_cache[_1] = _unmemoized_foo(*a, **kw)
+            end                                                         #   end
+          end                                                           # end
         end_ruby
       end
     end
