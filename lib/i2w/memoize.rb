@@ -7,9 +7,15 @@ module I2w
 
     def memoize(*method_names)
       method_names.each do |method_name|
+        visibility = (private_method_defined?(method_name) && 'private') ||
+                     (protected_method_defined?(method_name) && 'protected') || 'public'
+
         alias_method "_unmemoized_#{method_name}", method_name
         remove_method method_name
+
         module_eval <<~end_ruby, __FILE__, __LINE__
+          #{visibility}                                                 # protected
+                                                                        #
           def #{method_name}(*a, **kw)                                  # def foo(*a, **kw)
             _memoize_cache.fetch [:#{method_name}, a, kw] do            #   _memoize_cache.fetch [:foo, a, kw] do
               _memoize_cache[_1] = _unmemoized_#{method_name}(*a, **kw) #     _memoize_cache[_1] = _unmemoized_foo(*a, **kw)

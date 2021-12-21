@@ -5,7 +5,35 @@ require 'test_helper'
 require 'i2w/memoize'
 
 module I2w
-  class MemoizeTest < ActiveSupport::TestCase
+  class MemoizeMethodVisibilityTest < ActiveSupport::TestCase
+    class Test
+      extend Memoize
+
+      memoize def public_foo; end
+
+      protected
+
+      memoize def protected_foo; end
+
+      private
+
+      memoize def private_foo; end
+    end
+
+    test 'public methods remain public' do
+      assert Test.public_instance_methods.include?(:public_foo)
+    end
+
+    test 'protected methods remain protected' do
+      assert Test.protected_instance_methods.include?(:protected_foo)
+    end
+
+    test 'private methods remain private' do
+      assert Test.private_instance_methods.include?(:private_foo)
+    end
+  end
+
+  class MemoizeLintTest < ActiveSupport::TestCase
     class Test
       extend Memoize
 
