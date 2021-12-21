@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module I2w
-  # Memoization which handles frozen objects, and including modules with memoized methods
+  # Memoization which handles frozen objects, including, and extending modules with memoized methods
   module Memoize
     def self.extended(object) = Attach.call(object)
 
@@ -31,7 +31,7 @@ module I2w
 
       def included(object) = super.tap { Attach.call(object) }
 
-      def extended(object) = super.tap { object.include(ForSingleton) }
+      def extended(object) = super.tap { object.extend(ForSingleton) }
     end
 
     module ForClass #:nodoc:

@@ -83,7 +83,6 @@ module I2w
       end
     end
 
-
     module ExtendSelfTest
       extend Memoize
       extend self
@@ -96,9 +95,24 @@ module I2w
       end
     end
 
+    class ExtendMemoizedModuleTest
+      module MemoMod
+        extend Memoize
+
+        attr_writer :side_effects
+
+        memoize def foo(*args, **opts)
+          @side_effects << [self, :foo, args, opts]
+          "Foo: #{args.join(', ')}"
+        end
+      end
+
+      extend MemoMod
+    end
+
     {
       class: [Test, SubclassTest, ImmutableTest, ModuleTest],
-      singleton: [SingletonClassTest, SingletonModuleTest, ExtendSelfTest]
+      singleton: [SingletonClassTest, SingletonModuleTest, ExtendSelfTest, ExtendMemoizedModuleTest]
     }.each do |type, classes|
       classes.each do |klass|
         test "#{type}: #{klass}: memoization works as expected" do
@@ -124,7 +138,7 @@ module I2w
                         [obj, :foo, [3], {}]], side_effects
 
           obj.send(:_memoize_cache).clear
-          
+
           assert_equal 'Foo: 1', obj.foo(1)
           assert_equal [[obj, :foo, [1], {}],
                         [obj, :foo, [2], {}],
