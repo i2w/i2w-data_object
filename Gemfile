@@ -8,5 +8,8 @@ group :development do
   gem 'sqlite3'
 end
 
+# TODO - make a gemspec dependency once gems released
+gem 'i2w-result', github: 'i2w/i2w-result'
+
 # To use a debugger
 gem 'ruby_jard', group: [:development, :test]

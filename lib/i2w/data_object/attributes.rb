@@ -1,75 +1,18 @@
 # frozen_string_literal: true
 
 require_relative 'define_attributes'
+require_relative 'attributes/class_methods'
+require_relative 'attributes/instance_methods'
 
 module I2w
   module DataObject
     # include this to define immutable attributes for your class or module
     module Attributes
-      module ClassMethods #:nodoc:
-        # create a data object from an object that can be double splatted, see #to_attributes_hash
-        def from(...) = new(**to_attributes_hash(...))
-
-        # returns a hash of attributes with unknown removed, and missing filled
-        def to_attributes_hash(object, &fill_missing)
-          attributes = object.to_h.symbolize_keys.slice(*attribute_names)
-          (attribute_names - attributes.keys).each { attributes[_1] = fill_missing&.call(_1) }
-          attributes
-        end
-
-        def attributes = @attributes ||= finalize_attributes
-
-        def attribute_names = attributes.keys
-
-        private
-
-        def finalize_attributes = ancestor_attributes.each { define_attribute_method(_1, _2) }
-
-        def define_attribute_method(name, _meta)
-          attribute_methods.attr_reader(name) unless attribute_methods.public_method_defined?(name, false)
-          unless attribute_methods.method_defined?("#{name}=", false) || attribute_methods.private_method_defined?("#{name}=", false)
-            attribute_methods.attr_writer(name)
-            attribute_methods.send(:private, :"#{name}=")
-          end
-        end
-
-        def attribute_methods
-          module_eval 'module AttributeMethods; end', __FILE__, __LINE__
-          include(self::AttributeMethods)
-          self::AttributeMethods
-        end
-
-        def ancestor_attributes
-          [self, *ancestors].map { _1.instance_variable_get :@_attributes }.reverse
-                            .each_with_object({}) { |attrs, result| result.merge!(attrs) if attrs }
-        end
-
-        def inherited(subclass)
-          finalize_attributes
-          super
-        end
-      end
-
-      module InstanceMethods #:nodoc:
-        def attributes = attribute_names.to_h { [_1, send(_1)] }
-
-        def attribute_names = self.class.attribute_names
-
-        private
-
-        def assert_correct_attribute_names!(names)
-          unknown_attributes = names - attribute_names
-          raise UnknownAttributeError, "Unknown attribute #{unknown_attributes}" if unknown_attributes.any?
-
-          missing_attributes = attribute_names - names
-          raise MissingAttributeError, "Missing attribute #{missing_attributes}" if missing_attributes.any?
-        end
-      end
-
       include InstanceMethods
 
       def self.included(into) = into.extend(ClassMethods, DefineAttributes)
 
+      # attributes are initialized with private attribute writers, then frozen
       def initialize(**attrs)
         assert_correct_attribute_names!(attrs.keys)
         attrs.each { send "#{_1}=", _2 }
@@ -80,20 +23,18 @@ module I2w
       module Mutable
         include InstanceMethods
 
-        def self.included(into) = into.extend(AttributeWriters, ClassMethods, DefineAttributes)
+        def self.included(into) = into.extend(PublicAttributeWriter, ClassMethods, DefineAttributes)
 
+        # attributes are initialized with public attribute writers
         def initialize(**attrs)
           assert_correct_attribute_names!(attrs.keys)
           attrs.each { public_send "#{_1}=", _2 }
         end
 
-        module AttributeWriters #:nodoc:
+        module PublicAttributeWriter
           private
 
-          def define_attribute_method(name, _meta)
-            super
-            attribute_methods.send(:public, :"#{name}=") if attribute_methods.private_method_defined?("#{name}=", false)
-          end
+          def define_writer_visibility(attr) = attribute_methods.send(:public, "#{attr}=")
         end
       end
     end

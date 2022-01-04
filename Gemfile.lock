@@ -1,11 +1,21 @@
+GIT
+  remote: https://github.com/i2w/i2w-result.git
+  revision: 22a98da2968aaaed1a98aa59be6039a74cb89ac2
+  specs:
+    i2w-result (0.1.0)
+      activemodel (>= 6)
+
 PATH
   remote: .
   specs:
     i2w-data_object (0.1.0)
+      activemodel (>= 6)
 
 GEM
   remote: https://rubygems.org/
   specs:
+    activemodel (7.0.0)
+      activesupport (= 7.0.0)
     activesupport (7.0.0)
       concurrent-ruby (~> 1.0, >= 1.0.2)
       i18n (>= 1.6, < 2)
@@ -37,6 +47,7 @@ PLATFORMS
 DEPENDENCIES
   activesupport (>= 6)
   i2w-data_object!
+  i2w-result!
   rake (>= 13.0.3)
   ruby_jard
   sqlite3
