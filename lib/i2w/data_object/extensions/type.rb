@@ -20,7 +20,7 @@ module I2w
         end
 
         def lookup_type(_name, type)
-          return IdentityType if type.nil?
+          return ObjectType if type.nil?
 
           type.respond_to?(:cast) ? type : ActiveModel::Type.lookup(type)
         end
@@ -28,19 +28,19 @@ module I2w
         module AttributeMethods
           private
 
-          def define_writer(name, meta)
+          def define_attribute_writer(name, meta)
+            type = meta.fetch(:type)
             attribute_methods.redefine_method("#{name}=") do |val|
-              val = val.resolve(self) if val.is_a?(Default::Unresolved)
-              instance_variable_set :"@#{name}", meta.fetch(:type).cast(val)
+              instance_variable_set :"@#{name}", type.cast(Lazy.resolve(val, self))
             end
           end
         end
 
         # TODO: add an array type
-        class IdentityType
+        class ObjectType
           def self.cast(val) = val
 
-          def self.type = :string
+          def self.type = :object
         end
       end
     end

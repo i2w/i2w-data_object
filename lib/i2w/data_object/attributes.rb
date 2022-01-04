@@ -12,7 +12,7 @@ module I2w
 
       def self.included(into) = into.extend(ClassMethods, DefineAttributes)
 
-      # attributes are initialized with private attribute writers, then frozen
+      # attributes are initialized with private attribute writers, then freeze self
       def initialize(**attrs)
         assert_correct_attribute_names!(attrs.keys)
         attrs.each { send "#{_1}=", _2 }
@@ -34,7 +34,7 @@ module I2w
         module PublicAttributeWriter
           private
 
-          def define_writer_visibility(attr) = attribute_methods.send(:public, "#{attr}=")
+          def set_attribute_writer_visibility(attr) = attribute_methods.send(:public, "#{attr}=")
         end
       end
     end

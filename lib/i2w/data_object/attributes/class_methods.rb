@@ -23,20 +23,22 @@ module I2w
         def finalize_attributes = ancestor_attributes.each { define_attribute_accessor _1, _2 }
 
         def define_attribute_accessor(attr, meta)
-          define_reader(attr, meta)
-          define_writer(attr, meta)
-          define_writer_visibility(attr)
+          define_attribute_reader(attr, meta)
+          define_attribute_writer(attr, meta)
+          set_attribute_writer_visibility(attr)
         end
 
-        def define_reader(attr, _meta)
+        def define_attribute_reader(attr, _meta)
           attribute_methods.redefine_method(attr) { instance_variable_get "@#{attr}" }
         end
 
-        def define_writer(attr, _meta)
-          attribute_methods.redefine_method("#{attr}=") { |val| instance_variable_set "@#{attr}", val }
+        def define_attribute_writer(attr, _meta)
+          attribute_methods.redefine_method("#{attr}=") do |val|
+            instance_variable_set "@#{attr}", Lazy.resolve(val, self)
+          end
         end
 
-        def define_writer_visibility(attr) = attribute_methods.send(:private, "#{attr}=")
+        def set_attribute_writer_visibility(attr) = attribute_methods.send(:private, "#{attr}=")
 
         def attribute_methods
           module_eval 'module AttributeMethods; end', __FILE__, __LINE__

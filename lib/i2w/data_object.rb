@@ -5,6 +5,7 @@ require_relative 'data_object/attributes'
 require_relative 'data_object/extensions/default'
 require_relative 'data_object/extensions/type'
 require_relative 'memoize'
+require_relative 'lazy'
 
 module I2w
   module DataObject
