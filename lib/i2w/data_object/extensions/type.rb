@@ -9,7 +9,7 @@ module I2w
       module Type
         def self.extended(into)
           # only extend the attribute defining capability into an actual DataObject
-          into.extend(AttributeMethods) if into.singleton_class.ancestors.include?(Attributes::ClassMethods)
+          into.extend(AttributeClassMethods) if into.singleton_class.ancestors.include?(Attributes::ClassMethods)
         end
 
         protected
@@ -25,7 +25,7 @@ module I2w
           type.respond_to?(:cast) ? type : ActiveModel::Type.lookup(type)
         end
 
-        module AttributeMethods
+        module AttributeClassMethods
           private
 
           def define_attribute_writer(name, meta)

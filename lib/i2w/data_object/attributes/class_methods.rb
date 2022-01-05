@@ -20,16 +20,12 @@ module I2w
 
         private
 
-        def finalize_attributes = ancestor_attributes.each { define_attribute_accessor _1, _2 }
-
-        def define_attribute_accessor(attr, meta)
-          define_attribute_reader(attr, meta)
-          define_attribute_writer(attr, meta)
-          set_attribute_writer_visibility(attr)
-        end
-
-        def define_attribute_reader(attr, _meta)
-          attribute_methods.redefine_method(attr) { instance_variable_get "@#{attr}" }
+        def finalize_attributes
+          self_and_ancestor_attributes.each do |attr, meta|
+            attribute_methods.redefine_method(attr) { instance_variable_get "@#{attr}" }
+            define_attribute_writer(attr, meta)
+            set_attribute_writer_visibility(attr)
+          end
         end
 
         def define_attribute_writer(attr, _meta)
@@ -46,7 +42,7 @@ module I2w
           self::AttributeMethods
         end
 
-        def ancestor_attributes
+        def self_and_ancestor_attributes
           [self, *ancestors].map { _1.instance_variable_get :@_attributes }.reverse
                             .each_with_object({}) { |attrs, result| result.merge!(attrs) if attrs }
         end

@@ -11,7 +11,7 @@ module I2w
           raise ArgumentError, "extend #{self} before #{Type}" if into.singleton_class.ancestors.include?(Type)
 
           # only extend the attribute defining capability into an actual DataObject
-          into.extend(AttributeMethods) if into.singleton_class.ancestors.include?(Attributes::ClassMethods)
+          into.extend(AttributeClassMethods) if into.singleton_class.ancestors.include?(Attributes::ClassMethods)
         end
 
         protected
@@ -21,7 +21,7 @@ module I2w
           _attributes[name][:default] = default unless default == NoArg
         end
 
-        module AttributeMethods
+        module AttributeClassMethods
           def new(**attributes) = super(**fill_missing_with_lazy_default(attributes))
 
           def from(hashy = {}) = super(fill_missing_with_lazy_default(**hashy))
