@@ -5,12 +5,13 @@ module I2w
   # anywhere
   class Lazy
     class << self
+      # If the object is Lazy, resolve it given the context, otherwise return the object
       def resolve(object, context)
-        object.is_a?(self) ? object.resolve(context) : object
+        object.is_a?(Lazy) ? object.resolve(context) : object
       end
 
-      alias [] resolve
-
+      # Lazy.new(lazy, extra = nil) or
+      # Lazy.new(extra = nil, &lazy)
       def new(*args, &block)
         args = [block, *args] if block
         super(*args)
