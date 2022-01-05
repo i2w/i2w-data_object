@@ -28,14 +28,11 @@ module I2w
 
           private
 
-          def fill_missing_with_lazy_default(attributes)
-            unresolved = attributes.dup
-            (_attributes.keys - attributes.keys).each do
-              if _attributes[_1].key?(:default)
-                unresolved[_1] = Lazy.new(_attributes[_1][:default], attributes)
-              end
-            end
-            unresolved
+          def fill_missing_with_lazy_default(attrs)
+            defaults = _attributes.select { |attr, meta| !attrs.key?(attr) && meta.key?(:default) }
+            defaults.transform_values! { Lazy.new(_1[:default], attrs) }
+
+            attrs.merge(defaults)
           end
         end
       end
