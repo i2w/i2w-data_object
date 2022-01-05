@@ -1,6 +1,8 @@
 # frozen_string_literal: true
 
 module I2w
+  # simple protocol for deferring evaluation of values, used in DataObject::Extensions::Default, but can be used
+  # anywhere
   class Lazy
     class << self
       def resolve(object, context)
@@ -11,7 +13,7 @@ module I2w
 
       def new(*args, &block)
         args = [block, *args] if block
-        super *args
+        super(*args)
       end
     end
 

@@ -177,5 +177,18 @@ module I2w
       actual = MutablePoint.to_attributes_hash([['x', 1], [:z, 4], [:zoopy, [1, 2, 3, 4]]]) { 0 }
       assert_equal({ x: 1, y: 0 }, actual)
     end
+
+    test 'lazy attributes are resolved on setting' do
+      actual = ImmutablePoint.new x: Lazy.new { 12 }, y: Lazy.new { _1.x * 2 }
+      assert_equal({x: 12, y: 24}, actual.attributes)
+
+      actual = ImmutablePoint.new x: Lazy.new(10), y: Lazy.new(2) { _1.x + _2 }
+      assert_equal({x: 10, y: 12}, actual.attributes)
+
+      actual = MutablePoint.new(x: 0, y: 0)
+      actual.x = Lazy.new(-> { 1 })
+      actual.y = Lazy.new(-> { _1.x + 1 })
+      assert_equal({x: 1, y: 2}, actual.attributes)
+    end
   end
 end
