@@ -18,7 +18,7 @@ module I2w
     # an immutable, frozen, DataObject
     class Immutable
       extend Memoize
-      include Attributes
+      include Attributes::Immutable
     end
 
     # a DataObject that is mutable (has attr_writers, and uses defined setters on initialization)

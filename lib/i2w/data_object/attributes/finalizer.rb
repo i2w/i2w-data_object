@@ -9,22 +9,21 @@ module I2w
 
         def private_writer? = @private_writer
 
-        def initialize(do_class, **kwargs)
+        def initialize(do_class, private_writer: false, define_writer: method(:default_define_writer))
           @do_class = do_class
-          configure(**kwargs)
+          @private_writer = private_writer
+          @define_writer = define_writer
         end
 
-        def configure(private_writer: false, define_writer: method(:default_define_writer))
-          @private_writer = private_writer
-          @define_writer  = define_writer
-          self
+        def configure(private_writer: private_writer?, define_writer: self.define_writer)
+          self.class.new(do_class, private_writer: private_writer, define_writer: define_writer)
         end
 
         # sets up our do_class with attribute reader/writers, and returns all the attributes with their meta info
         def call
           collect_attributes.tap do |attributes|
-            do_class.const_set(:AttributeMethods, def_attribute_methods_module(attributes))
-            do_class.include(do_class::AttributeMethods)
+            do_class.const_set(:GeneratedAttributeMethods, define_attribute_methods_module(attributes))
+            do_class.include(do_class::GeneratedAttributeMethods)
           end
         end
 
@@ -35,11 +34,11 @@ module I2w
                                          .each_with_object({}) { |attrs, result| result.merge!(attrs) if attrs }
         end
 
-        def def_attribute_methods_module(attributes)
-          Module.new.tap { |mod| attributes.each { def_attribute(mod, _1, _2) } }
+        def define_attribute_methods_module(attributes)
+          Module.new.tap { |mod| attributes.each { define_attribute(mod, _1, _2) } }
         end
 
-        def def_attribute(mod, attr, meta)
+        def define_attribute(mod, attr, meta)
           mod.attr_reader(attr)
           define_writer.call(mod, attr, meta)
           mod.send(:private, "#{attr}=") if private_writer?

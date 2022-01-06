@@ -60,7 +60,7 @@ module I2w
     end
 
     class ModularImmutable3dPoint
-      include DataObject::Attributes
+      include DataObject::Attributes::Immutable
       include PointXY
       include PointZ
     end

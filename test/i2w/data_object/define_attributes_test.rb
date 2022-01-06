@@ -26,14 +26,14 @@ module I2w
 
       class Test
         include Foo
-        include Attributes # provides .attribute_names
+        include Attributes::Immutable # provides .attribute_names
         include FooAndBar
 
         attribute :baz
       end
 
       test 'class that includes module with attributes' do
-        
+
         assert_equal %i[foo bar baz], Test.attribute_names
       end
     end
