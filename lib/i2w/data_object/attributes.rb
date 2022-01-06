@@ -10,7 +10,13 @@ module I2w
     module Attributes
       include InstanceMethods
 
-      def self.included(into) = into.extend(ClassMethods, DefineAttributes)
+      def self.included(into)
+        into.extend(ClassMethods, DefineAttributes)
+
+        into.define_singleton_method :attributes_finalizer do
+          super().configure(private_writer: true)
+        end
+      end
 
       # attributes are initialized with private attribute writers, then freeze self
       def initialize(**attrs)
@@ -23,18 +29,12 @@ module I2w
       module Mutable
         include InstanceMethods
 
-        def self.included(into) = into.extend(PublicAttributeWriter, ClassMethods, DefineAttributes)
+        def self.included(into) = into.extend(ClassMethods, DefineAttributes)
 
         # attributes are initialized with public attribute writers
         def initialize(**attrs)
           assert_correct_attribute_names!(attrs.keys)
           attrs.each { public_send "#{_1}=", _2 }
-        end
-
-        module PublicAttributeWriter
-          private
-
-          def set_attribute_writer_visibility(attr) = attribute_methods.send(:public, "#{attr}=")
         end
       end
     end

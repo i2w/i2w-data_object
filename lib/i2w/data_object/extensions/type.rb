@@ -28,11 +28,11 @@ module I2w
         module AttributeClassMethods
           private
 
-          def define_attribute_writer(name, meta)
-            type = meta.fetch(:type)
-            attribute_methods.redefine_method("#{name}=") do |val|
-              instance_variable_set :"@#{name}", type.cast(Lazy.resolve(val, self))
-            end
+          def attributes_finalizer
+            super.configure(define_writer: lambda do |mod, attr, meta|
+              type = meta.fetch(:type)
+              mod.define_method("#{attr}=") { instance_variable_set "@#{attr}", type.cast(Lazy.resolve(_1, self)) }
+            end)
           end
         end
 

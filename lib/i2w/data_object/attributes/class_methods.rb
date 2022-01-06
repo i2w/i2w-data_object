@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require_relative 'finalizer'
+
 module I2w
   module DataObject
     module Attributes
@@ -14,43 +16,13 @@ module I2w
           attributes
         end
 
-        def attributes = @attributes ||= finalize_attributes
+        def attributes = @attributes ||= attributes_finalizer.call
 
         def attribute_names = attributes.keys
 
         private
 
-        def finalize_attributes
-          self_and_ancestor_attributes.each do |attr, meta|
-            attribute_methods.redefine_method(attr) { instance_variable_get "@#{attr}" }
-            define_attribute_writer(attr, meta)
-            set_attribute_writer_visibility(attr)
-          end
-        end
-
-        def define_attribute_writer(attr, _meta)
-          attribute_methods.redefine_method("#{attr}=") do |val|
-            instance_variable_set "@#{attr}", Lazy.resolve(val, self)
-          end
-        end
-
-        def set_attribute_writer_visibility(attr) = attribute_methods.send(:private, "#{attr}=")
-
-        def attribute_methods
-          module_eval 'module AttributeMethods; end', __FILE__, __LINE__
-          include(self::AttributeMethods)
-          self::AttributeMethods
-        end
-
-        def self_and_ancestor_attributes
-          [self, *ancestors].map { _1.instance_variable_get :@_attributes }.reverse
-                            .each_with_object({}) { |attrs, result| result.merge!(attrs) if attrs }
-        end
-
-        def inherited(subclass)
-          finalize_attributes
-          super
-        end
+        def attributes_finalizer = Finalizer.new(self)
       end
     end
   end
