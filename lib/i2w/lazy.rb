@@ -4,10 +4,17 @@ module I2w
   # simple protocol for deferring evaluation of values, used in DataObject::Extensions::Default, but can be used
   # anywhere
   class Lazy
+    # include this into your class to mark it as a Lazy object, used by Lazy.resolve
+    module Protocol
+      def resolve(context) = raise(NotImplementedError)
+    end
+
+    include Protocol
+
     class << self
-      # If the object responds to #resolve, resolve it given the context, otherwise return the object
+      # If the object has Lazy::Protocol in its ancestors, resolve it given the context, otherwise return the object
       def resolve(object, context)
-        object.respond_to?(:resolve) ? object.resolve(context) : object
+        object.is_a?(Lazy::Protocol) ? object.resolve(context) : object
       end
 
       # Lazy.new(lazy, extra = nil) or

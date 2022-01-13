@@ -30,7 +30,7 @@ module I2w
 
           def fill_missing_with_lazy_default(attrs)
             defaults = _attributes.select do |attr, meta|
-              meta.key?(:default) && (!attrs.key?(attr) || attrs[attr].is_a?(MissingAttribute))
+              meta.key?(:default) && (!attrs.key?(attr) || MissingAttribute.missing?(attrs[attr]))
             end
 
             defaults.transform_values! { Lazy.new(_1[:default], attrs) }
