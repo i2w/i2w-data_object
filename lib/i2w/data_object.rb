@@ -2,6 +2,7 @@
 
 require_relative 'data_object/version'
 require_relative 'data_object/attributes'
+require_relative 'data_object/missing_attribute'
 require_relative 'data_object/extensions/default'
 require_relative 'data_object/extensions/type'
 require_relative 'memoize'

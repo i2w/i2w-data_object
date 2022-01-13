@@ -60,6 +60,15 @@ module I2w
           assert_raises MissingAttributeError do
             ImmutableDO.new
           end
+
+          assert_raises MissingAttributeError do
+            ImmutableDO.new normal: MissingAttribute.instance
+          end
+        end
+
+        test 'setting attribute to MissingAttribute triggers the default' do
+          actual = ImmutableDO.new(normal: nil, bar: MissingAttribute.instance)
+          assert_equal 'FooBar', actual.foobar
         end
       end
     end

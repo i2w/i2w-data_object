@@ -140,6 +140,7 @@ module I2w
 
     test '#new with missing attributes raises MissingAttributeError' do
       assert_raise(DataObject::MissingAttributeError) { MutablePoint.new(x: 1) }
+      assert_raise(DataObject::MissingAttributeError) { MutablePoint.new(x: 1, y: DataObject::MissingAttribute.instance) }
     end
 
     test '#from with unknown attributes ignores them' do

@@ -5,9 +5,9 @@ module I2w
   # anywhere
   class Lazy
     class << self
-      # If the object is Lazy, resolve it given the context, otherwise return the object
+      # If the object responds to #resolve, resolve it given the context, otherwise return the object
       def resolve(object, context)
-        object.is_a?(Lazy) ? object.resolve(context) : object
+        object.respond_to?(:resolve) ? object.resolve(context) : object
       end
 
       # Lazy.new(lazy, extra = nil) or
