@@ -17,10 +17,10 @@ module I2w
 
         def assert_correct_attribute_names!(names)
           unknown = names - attribute_names
-          raise UnknownAttributeError, "Unknown attribute #{unknown.join(', ')}" if unknown.any?
+          raise UnknownAttributeError, "Unknown attribute #{unknown.join(', ')} for #{self.class}" if unknown.any?
 
           missing = attribute_names - names
-          raise MissingAttributeError, "Missing attribute #{missing.join(', ')}" if missing.any?
+          raise MissingAttributeError, "Missing attribute #{missing.join(', ')} for #{self.class}" if missing.any?
         end
       end
     end
