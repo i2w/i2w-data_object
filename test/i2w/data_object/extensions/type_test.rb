@@ -22,6 +22,7 @@ module I2w
           assert_equal BigDecimal('14.23'), actual.price
           assert_equal Date.new(2021, 12, 13), actual.starts_at
           assert_equal true, actual.checked
+          assert actual.checked?
           assert_equal '1', actual.other
         end
 

@@ -32,6 +32,7 @@ module I2w
             super.configure(define_writer: lambda do |mod, attr, meta|
               type = meta.fetch(:type)
               mod.define_method("#{attr}=") { instance_variable_set "@#{attr}", type.cast(Lazy.resolve(_1, self)) }
+              mod.alias_method("#{attr}?", attr) if type.type == :boolean
             end)
           end
         end
