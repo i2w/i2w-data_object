@@ -1,6 +1,6 @@
 GIT
   remote: https://github.com/i2w/i2w-result.git
-  revision: 22a98da2968aaaed1a98aa59be6039a74cb89ac2
+  revision: 92d0edcab0bf30b3f359e8dad871fdaf9b781fda
   specs:
     i2w-result (0.1.0)
       activemodel (>= 6)
@@ -14,9 +14,9 @@ PATH
 GEM
   remote: https://rubygems.org/
   specs:
-    activemodel (7.0.0)
-      activesupport (= 7.0.0)
-    activesupport (7.0.0)
+    activemodel (7.0.1)
+      activesupport (= 7.0.1)
+    activesupport (7.0.1)
       concurrent-ruby (~> 1.0, >= 1.0.2)
       i18n (>= 1.6, < 2)
       minitest (>= 5.1)
@@ -36,13 +36,11 @@ GEM
       byebug (>= 9.1, < 12.0)
       pry (~> 0.13.0)
       tty-screen (~> 0.8.1)
-    sqlite3 (1.4.2)
     tty-screen (0.8.1)
     tzinfo (2.0.4)
       concurrent-ruby (~> 1.0)
 
 PLATFORMS
-  x86_64-darwin-20
   x86_64-darwin-21
 
 DEPENDENCIES
@@ -51,7 +49,6 @@ DEPENDENCIES
   i2w-result!
   rake (>= 13.0.3)
   ruby_jard
-  sqlite3
 
 BUNDLED WITH
-   2.2.32
+   2.3.5
