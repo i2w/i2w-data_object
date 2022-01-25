@@ -3,11 +3,14 @@
 require_relative 'define_attributes'
 require_relative 'attributes/class_methods'
 require_relative 'attributes/instance_methods'
+require_relative '../lazy'
 
 module I2w
   module DataObject
     module Attributes
       include InstanceMethods
+
+      Lazy = I2w::Lazy
 
       def self.included(into) = into.extend(ClassMethods, DefineAttributes)
 
