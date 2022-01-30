@@ -11,6 +11,16 @@ module I2w
       assert_equal :resolved, Lazy.resolve(:resolved, :context)
     end
 
+    test "Lazy.to_lazy(<could be Lazy>, ...) wraps argument in Lazy unless it is already one" do
+      lazy = Lazy.new { 3 }
+      non_lazy = :count
+
+      assert_equal lazy, Lazy.to_lazy(lazy)
+
+      assert_equal 3, Lazy.to_lazy(lazy).resolve([1,2,3,4])
+      assert_equal 4, Lazy.to_lazy(non_lazy).resolve([1,2,3,4])
+    end
+
     test "Symbol resolved as method sent to context" do
       lazy = Lazy.new(:count)
 

@@ -17,6 +17,11 @@ module I2w
         object.is_a?(Lazy::Protocol) ? object.resolve(context) : object
       end
 
+      # wraps the object in a lazy unless it already is one
+      def to_lazy(object, ...)
+        object.is_a?(Lazy::Protocol) ? object : new(object, ...)
+      end
+
       # Lazy.new(lazy, extra = nil) or
       # Lazy.new(extra = nil, &lazy)
       def new(*args, &block)
